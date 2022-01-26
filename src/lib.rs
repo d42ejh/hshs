@@ -19,7 +19,7 @@ use std::time::{Duration, SystemTime};
 #[derive(Archive, Deserialize, Serialize, Debug, PartialEq)]
 #[archive_attr(derive(CheckBytes, Debug))]
 pub struct H {
-    version: u16,
+    pub version: u16,
     bits: u16,
     date: String,
     rand: Vec<u8>,
@@ -127,7 +127,15 @@ impl H {
 
 impl fmt::Display for H {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", base64::encode_block(&self.rand))
+        write!(
+            f,
+            "{}:{}:{}:{}:{}",
+            self.version,
+            self.bits,
+            self.date,
+            base64::encode_block(&self.rand),
+            base64::encode_block(&self.counter)
+        )
     }
 }
 

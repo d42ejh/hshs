@@ -43,11 +43,6 @@ fn main() {
         //invalid request
         panic!();
     }
-    // or verify with deadline
-    if !received_challenge.verify() {
-        //invalid request(expired)
-        panic!();
-    }
 
     //clear the counter to verify signature
     received_challenge.clear_counter();

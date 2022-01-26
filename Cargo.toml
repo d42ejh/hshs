@@ -5,11 +5,17 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default=["bytes_le", "rkyv/validation"] 
+bytes_le=["rkyv/archive_le"]
+bytes_be=["rkyv/archive_be"]
+
 [dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
 chrono = "0.4"
-rkyv ={version= "0.7.26",features=["validation","archive_le"]}
 bytecheck = "0.6.7"
+rkyv ={version= "0.7.26",features=[]}
+
 
 [dev-dependencies]
 criterion = "0.3"

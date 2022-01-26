@@ -1,4 +1,5 @@
 use hshs::H;
+use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
 use openssl::sign;
@@ -14,7 +15,11 @@ fn main() {
     let keypair = Rsa::generate(2048).unwrap();
     let keypair = PKey::from_rsa(keypair).unwrap();
 
-    let challenge_bytes = challenge.to_bytes();
-    //sign the challenge
+    let serialized_challenge = challenge.to_bytes();
+
+    //sign the (serialized) challenge
+    let mut signer = Signer::new(MessageDigest::sha3_512(), &keypair).unwrap();
+    signer.update(&serialized_challenge).unwrap();
+    let signature = signer.sign_to_vec().unwrap();
     //
 }

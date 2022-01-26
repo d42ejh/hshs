@@ -65,7 +65,21 @@ impl H {
     }
 
     #[must_use]
-    pub fn verify(&self) -> bool {
+    fn verify_time(&self, deadline: &DateTime<Utc>) -> bool {
+        let gen_date = DateTime::parse_from_rfc3339(&self.date).unwrap();
+        let gen_date = DateTime::<Utc>::from_utc(gen_date.naive_utc(), Utc);
+        // println!("{}\n{}", gen_date, deadline);
+        if &gen_date > deadline {
+            return false;
+        }
+        true
+    }
+
+    #[must_use]
+    pub fn verify(&self, deadline: Option<&DateTime<Utc>>) -> bool {
+        if deadline.is_some() && !self.verify_time(deadline.unwrap()) {
+            return false;
+        }
         let hash = self.hash();
         let clz = u8_slice_clz(&hash);
         if clz == self.bits as usize {
@@ -78,10 +92,10 @@ impl H {
     #[must_use]
     pub fn solve(&mut self, time_out: Option<Duration>) -> bool {
         let start_time = SystemTime::now();
-        while !self.verify() {
+        while !self.verify(None) {
             if time_out.is_some() {
                 if start_time.elapsed().unwrap() > time_out.unwrap() {
-                    println!("solve time out");
+                    //    println!("solve time out");
                     return false;
                 }
             }
@@ -189,6 +203,27 @@ mod tests {
     }
 
     #[test]
+    fn test_deadline() {
+        let deadline = Utc::now();
+        std::thread::sleep(Duration::from_secs(1));
+        let mut c = H::new(1, 1);
+        assert!(c.solve(None));
+
+        //try verify after deadline
+        assert!(!c.verify_time(&deadline));
+        assert!(!c.verify(Some(&deadline)));
+
+        let mut c = H::new(1, 1);
+        assert!(c.solve(None));
+        let deadline = Utc::now() + chrono::Duration::hours(1);
+        assert!(c.verify_time(&deadline));
+        assert!(c.verify(Some(&deadline)));
+        let deadline = Utc::now() - chrono::Duration::hours(1);
+        assert!(!c.verify_time(&deadline));
+        assert!(!c.verify(Some(&deadline)));
+    }
+
+    #[test]
     fn simulation_test() {
         // A generate challenge
         let mut challenge = H::new(1, 10);
@@ -199,7 +234,7 @@ mod tests {
         println!("solved challenge!");
 
         //send to A and verify
-        assert!(challenge.verify());
+        assert!(challenge.verify(None));
         println!("done");
     }
 

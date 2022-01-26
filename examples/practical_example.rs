@@ -40,9 +40,10 @@ fn main() {
     if !received_challenge.verify() {
         //invalid request
     }
-    //clear the counter
-    received_challenge.clear_counter();
-    //serialize
+    
+    //clear the counter to verify signature
+    received_challenge.clear_counter(); 
+                                        //serialize
     let buffer = received_challenge.to_bytes();
 
     let mut verifier = Verifier::new(MessageDigest::sha3_512(), &keypair).unwrap();

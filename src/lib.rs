@@ -13,7 +13,6 @@ use rkyv::{
 use std::fmt;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime};
-
 //https://en.wikipedia.org/wiki/Hashcash
 //paper: https://link.springer.com/content/pdf/10.1007%2F3-540-48071-4_10.pdf
 
@@ -27,17 +26,19 @@ pub struct H {
     counter: Vec<u8>,
 }
 
+//todo datetime expire check
+
 impl H {
     //generate new challenge
     #[must_use]
     pub fn new(version: u16, bits: u16) -> Self {
-        let mut rand = vec![0; 61]; //todo
+        let mut rand = vec![0; 64]; //todo
         rand_bytes(&mut rand).unwrap();
         H {
             version: version,
             bits: bits,
             date: Utc::now().to_rfc3339(),
-            counter: vec![0; 0], //todo
+            counter: vec![0; 0],
             rand: rand,
         }
     }
@@ -50,6 +51,7 @@ impl H {
     }
 
     //to le bytes
+    #[must_use]
     fn to_bytes(&self) -> Vec<u8> {
         let mut serializer = AllocSerializer::<256>::default();
         serializer
@@ -58,8 +60,8 @@ impl H {
         serializer.into_serializer().into_inner().to_vec()
     }
 
+    #[must_use]
     fn hash(&self) -> Vec<u8> {
-        let b = self.to_bytes();
         let hash = hash(MessageDigest::sha3_512(), &self.to_bytes()).unwrap();
         hash.to_vec()
     }
@@ -75,6 +77,7 @@ impl H {
     }
 
     //todo timeout
+    #[must_use]
     pub fn solve(&mut self, time_out: &Option<Duration>) -> bool {
         let start_time = SystemTime::now();
         let mut count = 1;

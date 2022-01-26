@@ -10,6 +10,7 @@ openssl = { version = "0.10", features = ["vendored"] }
 chrono = "0.4"
 rkyv ={version= "0.7.26",features=["validation","archive_le"]}
 bytecheck = "0.6.7"
+#pqcrypto = "0.14.2"
 
 [dev-dependencies]
 criterion = "0.3"

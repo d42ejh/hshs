@@ -13,7 +13,10 @@ fn main() {
     //X generates an new challenge
     let version = 1;
     let bits = 10;
-    let challenge = H::new(version, bits);
+    let deadline_offset = Duration::minutes(2); //hshs calls Utc::now() internally when H::new() is called(the DateTime is stored in the struct H)
+                                                //deadline is Utc::now() + deadline_offset
+
+    let challenge = H::new(version, bits, Some(&deadline_offset));
     println!("generated the challenge {}", challenge);
     let keypair = Rsa::generate(2048).unwrap();
     let keypair = PKey::from_rsa(keypair).unwrap();
@@ -30,23 +33,20 @@ fn main() {
     let mut received_challenge = H::from_bytes(&serialized_challenge);
     // solve the challenge
     assert!(received_challenge.solve(None));
-    assert!(received_challenge.verify(None));
+    assert!(received_challenge.verify());
     let serialized_solved_challenge = received_challenge.to_bytes();
 
     ///////////////////////////////////////////////////////////////////////////
     // X receives the solved challenge from Y
     let mut received_challenge = H::from_bytes(&serialized_solved_challenge);
-    if !received_challenge.verify(None) {
+    if !received_challenge.verify() {
         //invalid request
     }
     // or verify with deadline
-    let fake_deadline = Utc::now() + Duration::minutes(2); //hshs calls Utc::now() internally when H::new() is called(the DateTime is stored in the struct H)
-    if !(received_challenge.verify(Some(&fake_deadline))) {
+    if !received_challenge.verify() {
         panic!();
         //invalid request(expired)
     }
-    let fake_deadline = Utc::now() - Duration::days(2);
-    assert!(!received_challenge.verify(Some(&fake_deadline))); //fail
 
     //clear the counter to verify signature
     received_challenge.clear_counter();

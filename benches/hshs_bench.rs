@@ -6,7 +6,7 @@ use hshs::H;
 fn solve_bits10_benchmark(c: &mut Criterion) {
     c.bench_function("solve bits 10", |b| {
         b.iter(|| {
-            let mut h = H::new(1, 10);
+            let mut h = H::new(1, 10, None);
             h.solve(black_box(None))
         })
     });
@@ -15,7 +15,7 @@ fn solve_bits10_benchmark(c: &mut Criterion) {
 fn solve_bits15_benchmark(c: &mut Criterion) {
     c.bench_function("solve bits 15", |b| {
         b.iter(|| {
-            let mut h = H::new(1, 15);
+            let mut h = H::new(1, 15, None);
             h.solve(black_box(None))
         })
     });

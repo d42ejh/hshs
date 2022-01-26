@@ -20,6 +20,7 @@ pub struct H {
     pub version: u16,
     bits: u16,
     date: String,
+    deadline: Option<String>,
     rand: Vec<u8>,
     counter: Vec<u8>,
 }
@@ -29,15 +30,29 @@ pub struct H {
 impl H {
     //generate new challenge
     #[must_use]
-    pub fn new(version: u16, bits: u16) -> Self {
+    pub fn new(version: u16, bits: u16, deadline_offset: Option<&chrono::Duration>) -> Self {
         let mut rand = vec![0; 64]; //todo(64 is should be fine)
         rand_bytes(&mut rand).unwrap();
-        H {
-            version: version,
-            bits: bits,
-            date: Utc::now().to_rfc3339(),
-            counter: Vec::new(),
-            rand: rand,
+        let now = Utc::now();
+        if deadline_offset.is_some() {
+            let deadline = now + *deadline_offset.unwrap();
+            H {
+                version: version,
+                bits: bits,
+                date: now.to_rfc3339(),
+                deadline: Some(deadline.to_rfc3339()),
+                counter: Vec::new(),
+                rand: rand,
+            }
+        } else {
+            return H {
+                version: version,
+                bits: bits,
+                date: now.to_rfc3339(),
+                deadline: None,
+                counter: Vec::new(),
+                rand: rand,
+            };
         }
     }
 
@@ -65,21 +80,21 @@ impl H {
     }
 
     #[must_use]
-    fn verify_time(&self, deadline: &DateTime<Utc>) -> bool {
-        let gen_date = DateTime::parse_from_rfc3339(&self.date).unwrap();
-        let gen_date = DateTime::<Utc>::from_utc(gen_date.naive_utc(), Utc);
-        // println!("{}\n{}", gen_date, deadline);
-        if &gen_date > deadline {
+    fn verify_deadline(&self) -> bool {
+        assert!(self.deadline.is_some());
+        let now = Utc::now();
+
+        let deadline = DateTime::parse_from_rfc3339(&self.deadline.as_ref().unwrap()).unwrap();
+        let deadline = DateTime::<Utc>::from_utc(deadline.naive_utc(), Utc);
+        // println!("now {}\ndeadline {}", now, deadline);
+        if now > deadline {
             return false;
         }
         true
     }
 
     #[must_use]
-    pub fn verify(&self, deadline: Option<&DateTime<Utc>>) -> bool {
-        if deadline.is_some() && !self.verify_time(deadline.unwrap()) {
-            return false;
-        }
+    fn verify_hash(&self) -> bool {
         let hash = self.hash();
         let clz = u8_slice_clz(&hash);
         if clz == self.bits as usize {
@@ -88,11 +103,22 @@ impl H {
         false
     }
 
+    #[must_use]
+    pub fn verify(&self) -> bool {
+        if self.deadline.is_some() && !self.verify_deadline() {
+            return false;
+        }
+        if !self.verify_hash() {
+            return false;
+        }
+        true
+    }
+
     // false == time out
     #[must_use]
     pub fn solve(&mut self, time_out: Option<Duration>) -> bool {
         let start_time = SystemTime::now();
-        while !self.verify(None) {
+        while !self.verify_hash() {
             if time_out.is_some() {
                 if start_time.elapsed().unwrap() > time_out.unwrap() {
                     //    println!("solve time out");
@@ -132,12 +158,19 @@ impl H {
 
 impl fmt::Display for H {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let dl;
+        if self.deadline.is_some() {
+            dl = self.deadline.as_ref().unwrap().to_owned();
+        } else {
+            dl = String::new();
+        }
         write!(
             f,
-            "{}:{}:{}:{}:{}",
+            "{}:{}:{}:{}:{}:{}",
             self.version,
             self.bits,
             self.date,
+            dl,
             base64::encode_block(&self.rand),
             base64::encode_block(&self.counter)
         )
@@ -198,35 +231,37 @@ mod tests {
     #[test]
     #[ignore]
     fn solve_timeout_test() {
-        let mut c = H::new(1, 20);
+        let mut c = H::new(1, 20, None);
         assert_eq!(false, c.solve(Some(Duration::from_secs(1))));
     }
 
     #[test]
     fn test_deadline() {
-        let deadline = Utc::now();
+        let deadline = chrono::Duration::milliseconds(1);
+        let mut c = H::new(1, 1, Some(&deadline));
+
+        //sleep
         std::thread::sleep(Duration::from_secs(1));
-        let mut c = H::new(1, 1);
         assert!(c.solve(None));
 
         //try verify after deadline
-        assert!(!c.verify_time(&deadline));
-        assert!(!c.verify(Some(&deadline)));
+        println!("a");
+        assert!(!c.verify_deadline());
+        assert!(!c.verify());
 
-        let mut c = H::new(1, 1);
+        println!("b");
+        //in time
+        let deadline = chrono::Duration::hours(1);
+        let mut c = H::new(1, 1, Some(&deadline));
         assert!(c.solve(None));
-        let deadline = Utc::now() + chrono::Duration::hours(1);
-        assert!(c.verify_time(&deadline));
-        assert!(c.verify(Some(&deadline)));
-        let deadline = Utc::now() - chrono::Duration::hours(1);
-        assert!(!c.verify_time(&deadline));
-        assert!(!c.verify(Some(&deadline)));
+        assert!(c.verify_deadline());
+        assert!(c.verify());
     }
 
     #[test]
     fn simulation_test() {
         // A generate challenge
-        let mut challenge = H::new(1, 10);
+        let mut challenge = H::new(1, 10, None);
         println!("Challenge: {}", challenge);
 
         // B receive challenge and solve
@@ -234,7 +269,7 @@ mod tests {
         println!("solved challenge!");
 
         //send to A and verify
-        assert!(challenge.verify(None));
+        assert!(challenge.verify());
         println!("done");
     }
 

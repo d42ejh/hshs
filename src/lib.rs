@@ -123,6 +123,10 @@ impl H {
             self.counter.resize(self.counter.len() + 1, 0);
         }
     }
+
+    pub fn clear_counter(&mut self) {
+        self.counter = Vec::new();
+    }
 }
 
 impl fmt::Display for H {

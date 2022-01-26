@@ -80,7 +80,7 @@ impl H {
     #[must_use]
     pub fn solve(&mut self, time_out: &Option<Duration>) -> bool {
         let start_time = SystemTime::now();
-        let mut count = 1;
+        // let mut count = 1;
         while !self.verify() {
             if time_out.is_some() {
                 if start_time.elapsed().unwrap() > time_out.unwrap() {
@@ -97,7 +97,7 @@ impl H {
             */
             //modify counter
             self.increment_counter();
-            count += 1;
+            //   count += 1;
         }
         //println!("solved with {} attempts", count);
         return true;

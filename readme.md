@@ -1,5 +1,3 @@
 # hshs
-WIP
+Simple hashcash.(Some features may not available)
 
-# tests
-cargo test -- --nocapture

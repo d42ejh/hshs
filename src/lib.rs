@@ -69,7 +69,7 @@ impl H {
     #[must_use]
     pub fn verify(&self) -> bool {
         let hash = self.hash();
-        let clz = u8_slice_clz_le(&hash);
+        let clz = u8_slice_clz(&hash);
         if clz == self.bits as usize {
             return true;
         }
@@ -131,7 +131,7 @@ impl fmt::Display for H {
     }
 }
 
-pub fn u8_slice_clz_le(v: &[u8]) -> usize {
+pub fn u8_slice_clz(v: &[u8]) -> usize {
     for i in 0..v.len() {
         if v[i] == 0 {
             //all zero
@@ -169,20 +169,21 @@ mod tests {
 
     #[test]
     fn cls_test() {
-        assert_eq!(u8_slice_clz_le(&vec![0; 0]), 0);
+        assert_eq!(u8_slice_clz(&vec![0; 0]), 0);
         let v: [u8; 2] = [0b0u8, 0b11111111u8];
 
         // println!("{}", fmt_u8_slice_as_dec(&v));
         // println!("{}", fmt_u8_slice_as_bin(&v));
-        assert_eq!(u8_slice_clz_le(&v), 8);
+        assert_eq!(u8_slice_clz(&v), 8);
         let v: [u8; 3] = [0b0u8, 0b00010000u8, 0b11111111u8];
         p(&v);
-        assert_eq!(u8_slice_clz_le(&v), 11);
+        assert_eq!(u8_slice_clz(&v), 11);
 
-        assert_eq!(u8_slice_clz_le(&vec![255; 255]), 0);
+        assert_eq!(u8_slice_clz(&vec![255; 255]), 0);
     }
 
     #[test]
+    #[ignore]
     fn solve_timeout_test() {
         let mut c = H::new(1, 20);
         assert_eq!(false, c.solve(&Some(Duration::from_secs(1))));
@@ -202,4 +203,7 @@ mod tests {
         assert!(challenge.verify());
         println!("done");
     }
+
+    // run tests
+    // cargo test -- --nocapture
 }

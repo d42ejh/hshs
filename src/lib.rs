@@ -7,11 +7,9 @@ use openssl::rand::rand_bytes;
 use rkyv::{
     archived_root,
     ser::{serializers::AllocSerializer, Serializer},
-    with::AsString,
     Archive, Deserialize, Infallible, Serialize,
 };
 use std::fmt;
-use std::str::FromStr;
 use std::time::{Duration, SystemTime};
 //https://en.wikipedia.org/wiki/Hashcash
 //paper: https://link.springer.com/content/pdf/10.1007%2F3-540-48071-4_10.pdf
@@ -32,13 +30,13 @@ impl H {
     //generate new challenge
     #[must_use]
     pub fn new(version: u16, bits: u16) -> Self {
-        let mut rand = vec![0; 64]; //todo
+        let mut rand = vec![0; 64]; //todo(64 is should be fine)
         rand_bytes(&mut rand).unwrap();
         H {
             version: version,
             bits: bits,
             date: Utc::now().to_rfc3339(),
-            counter: vec![0; 0],
+            counter: Vec::new(),
             rand: rand,
         }
     }

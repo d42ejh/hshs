@@ -74,11 +74,10 @@ impl H {
         false
     }
 
-    //todo timeout
+    // false == time out
     #[must_use]
     pub fn solve(&mut self, time_out: Option<Duration>) -> bool {
         let start_time = SystemTime::now();
-        // let mut count = 1;
         while !self.verify() {
             if time_out.is_some() {
                 if start_time.elapsed().unwrap() > time_out.unwrap() {
@@ -86,18 +85,8 @@ impl H {
                     return false;
                 }
             }
-            /*
-            println!(
-                "solve {} coutner: {}",
-                count,
-                base64::encode_block(&self.counter)
-            );
-            */
-            //modify counter
             self.increment_counter();
-            //   count += 1;
         }
-        //println!("solved with {} attempts", count);
         return true;
     }
 

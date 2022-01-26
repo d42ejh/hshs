@@ -41,11 +41,12 @@ fn main() {
     let mut received_challenge = H::from_bytes(&serialized_solved_challenge);
     if !received_challenge.verify() {
         //invalid request
+        panic!();
     }
     // or verify with deadline
     if !received_challenge.verify() {
-        panic!();
         //invalid request(expired)
+        panic!();
     }
 
     //clear the counter to verify signature
@@ -57,6 +58,7 @@ fn main() {
     verifier.update(&buffer).unwrap();
     if !verifier.verify(&signature).unwrap() {
         //invalid request
+        panic!();
     }
     println!("Done");
 }

@@ -96,7 +96,7 @@ impl H {
             self.increment_counter();
             count += 1;
         }
-        println!("solved with {} attempts", count);
+        //println!("solved with {} attempts", count);
         return true;
     }
 

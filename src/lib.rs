@@ -52,7 +52,7 @@ impl H {
 
     //to le bytes
     #[must_use]
-    fn to_bytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Vec<u8> {
         let mut serializer = AllocSerializer::<256>::default();
         serializer
             .serialize_value(self)

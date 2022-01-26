@@ -1,11 +1,10 @@
+use chrono::{DateTime, Duration, Utc};
 use hshs::H;
 use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
 use openssl::sign;
 use openssl::sign::{Signer, Verifier};
-
-struct Message {}
 
 //openssl doc: https://docs.rs/openssl/latest/openssl/sign/index.html
 // cargo run --example practical_example
@@ -31,19 +30,27 @@ fn main() {
     let mut received_challenge = H::from_bytes(&serialized_challenge);
     // solve the challenge
     assert!(received_challenge.solve(None));
-    assert!(received_challenge.verify());
+    assert!(received_challenge.verify(None));
     let serialized_solved_challenge = received_challenge.to_bytes();
 
     ///////////////////////////////////////////////////////////////////////////
     // X receives the solved challenge from Y
     let mut received_challenge = H::from_bytes(&serialized_solved_challenge);
-    if !received_challenge.verify() {
+    if !received_challenge.verify(None) {
         //invalid request
     }
-    
+    // or verify with deadline
+    let fake_deadline = Utc::now() + Duration::minutes(2); //hshs calls Utc::now() internally when H::new() is called(the DateTime is stored in the struct H)
+    if !(received_challenge.verify(Some(&fake_deadline))) {
+        panic!();
+        //invalid request(expired)
+    }
+    let fake_deadline = Utc::now() - Duration::days(2);
+    assert!(!received_challenge.verify(Some(&fake_deadline))); //fail
+
     //clear the counter to verify signature
-    received_challenge.clear_counter(); 
-                                        //serialize
+    received_challenge.clear_counter();
+    //serialize
     let buffer = received_challenge.to_bytes();
 
     let mut verifier = Verifier::new(MessageDigest::sha3_512(), &keypair).unwrap();

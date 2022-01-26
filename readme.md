@@ -1,3 +1,3 @@
 # hshs
-Simple sha3-512 hashcash.(Some features may not available)
-Still work in progress.
+Simple sha3-512 hashcash.(Some features may not available)  
+Still work in progress but most of fundamental features are done.

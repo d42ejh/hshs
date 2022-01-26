@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
 chrono = "0.4"
+rkyv ={version= "0.7.26",features=["validation","archive_le"]}
+bytecheck = "0.6.7"

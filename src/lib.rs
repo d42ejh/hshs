@@ -78,7 +78,7 @@ impl H {
 
     //todo timeout
     #[must_use]
-    pub fn solve(&mut self, time_out: &Option<Duration>) -> bool {
+    pub fn solve(&mut self, time_out: Option<Duration>) -> bool {
         let start_time = SystemTime::now();
         // let mut count = 1;
         while !self.verify() {
@@ -194,7 +194,7 @@ mod tests {
     #[ignore]
     fn solve_timeout_test() {
         let mut c = H::new(1, 20);
-        assert_eq!(false, c.solve(&Some(Duration::from_secs(1))));
+        assert_eq!(false, c.solve(Some(Duration::from_secs(1))));
     }
 
     #[test]
@@ -204,7 +204,7 @@ mod tests {
         println!("Challenge: {}", challenge);
 
         // B receive challenge and solve
-        assert!(challenge.solve(&None));
+        assert!(challenge.solve(None));
         println!("solved challenge!");
 
         //send to A and verify

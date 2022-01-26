@@ -12,6 +12,7 @@ use rkyv::{
 };
 use std::fmt;
 use std::str::FromStr;
+use std::time::{Duration, SystemTime};
 
 //https://en.wikipedia.org/wiki/Hashcash
 //paper: https://link.springer.com/content/pdf/10.1007%2F3-540-48071-4_10.pdf
@@ -74,24 +75,36 @@ impl H {
     }
 
     //todo timeout
-    pub fn solve(&mut self) {
-        let count = 1;
+    pub fn solve(&mut self, time_out: &Option<Duration>) -> bool {
+        let start_time = SystemTime::now();
+        let mut count = 1;
         while !self.verify() {
+            if time_out.is_some() {
+                if start_time.elapsed().unwrap() > time_out.unwrap() {
+                    println!("solve time out");
+                    return false;
+                }
+            }
+            /*
             println!(
                 "solve {} coutner: {}",
                 count,
                 base64::encode_block(&self.counter)
             );
+            */
             //modify counter
             self.increment_counter();
+            count += 1;
         }
+        println!("solved with {} attempts", count);
+        return true;
     }
 
     fn increment_counter(&mut self) {
         //todo edge case, all 255
         let mut is_incremented = false;
         for i in (0..self.counter.len()).rev() {
-            println!("inc counter i: {}", i);
+            // println!("inc counter i: {}", i);
             if self.counter[i] == u8::MAX.into() {
                 continue;
             }
@@ -103,7 +116,7 @@ impl H {
 
         //extend
         if !is_incremented {
-            println!("extend counter");
+            //  println!("extend counter");
             self.counter.resize(self.counter.len() + 1, 0);
         }
     }
@@ -167,15 +180,23 @@ mod tests {
     }
 
     #[test]
+    fn solve_timeout_test() {
+        let mut c = H::new(1, 20);
+        assert_eq!(false, c.solve(&Some(Duration::from_secs(1))));
+    }
+
+    #[test]
     fn simulation_test() {
         // A generate challenge
-        let mut challenge = H::new(1, 2);
+        let mut challenge = H::new(1, 10);
         println!("Challenge: {}", challenge);
 
         // B receive challenge and solve
-        challenge.solve();
+        assert!(challenge.solve(&None));
         println!("solved challenge!");
 
-        //todo send to A and verify
+        //send to A and verify
+        assert!(challenge.verify());
+        println!("done");
     }
 }

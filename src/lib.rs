@@ -22,6 +22,7 @@ pub struct H {
     deadline: Option<String>,
     rand: Vec<u8>,
     counter: Vec<u8>,
+    pub meta: Option<Vec<u8>>, //optional metadata field
 }
 
 //todo datetime expire check
@@ -29,10 +30,15 @@ pub struct H {
 impl H {
     //generate new challenge
     #[must_use]
-    pub fn new(bits: u16, deadline_offset: Option<&chrono::Duration>) -> Self {
-        let mut rand = vec![0; 64]; //todo(64 is should be fine)
+    pub fn new(bits: u16, deadline_offset: Option<&chrono::Duration>, meta: Option<&[u8]>) -> Self {
+        let mut rand = vec![0; 64]; //todo change 64 to reasonable size
         rand_bytes(&mut rand).unwrap();
         let now = Utc::now();
+        let m = match meta {
+            Some(x) => Some(x.to_owned()),
+            None => None,
+        };
+
         if deadline_offset.is_some() {
             let deadline = now + *deadline_offset.unwrap();
             H {
@@ -41,6 +47,7 @@ impl H {
                 deadline: Some(deadline.to_rfc3339()),
                 counter: Vec::new(),
                 rand: rand,
+                meta: m,
             }
         } else {
             return H {
@@ -49,6 +56,7 @@ impl H {
                 deadline: None,
                 counter: Vec::new(),
                 rand: rand,
+                meta: m,
             };
         }
     }
@@ -225,16 +233,15 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn solve_timeout_test() {
-        let mut c = H::new(20, None);
-        assert_eq!(false, c.solve(Some(Duration::from_secs(1))));
+        let mut c = H::new(20, None, None);
+        assert_eq!(false, c.solve(Some(Duration::from_nanos(1))));
     }
 
     #[test]
     fn test_deadline() {
         let deadline = chrono::Duration::milliseconds(1);
-        let mut c = H::new(1, Some(&deadline));
+        let mut c = H::new(1, Some(&deadline), None);
 
         //sleep
         std::thread::sleep(Duration::from_secs(1));
@@ -248,7 +255,7 @@ mod tests {
         println!("b");
         //in time
         let deadline = chrono::Duration::hours(1);
-        let mut c = H::new(1, Some(&deadline));
+        let mut c = H::new(1, Some(&deadline), None);
         assert!(c.solve(None));
         assert!(c.verify_deadline());
         assert!(c.verify());
@@ -257,7 +264,7 @@ mod tests {
     #[test]
     fn simulation_test() {
         // A generate challenge
-        let mut challenge = H::new(10, None);
+        let mut challenge = H::new(10, None, None);
         println!("Challenge: {}", challenge);
 
         // B receive challenge and solve

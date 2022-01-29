@@ -11,7 +11,8 @@ use rkyv::{
     Archive, Deserialize, Infallible, Serialize,
 };
 
-//use serde or whatever you prefer
+// example metadata
+// use serde or whatever you prefer
 #[derive(Archive, Deserialize, Serialize, Debug, PartialEq, Default)]
 #[archive_attr(derive(CheckBytes, Debug))]
 struct YourMetadata {
@@ -49,8 +50,8 @@ fn main() {
     let deadline_offset = Duration::minutes(2); //hshs calls Utc::now() internally when H::new() is called(the DateTime is stored in the struct H)
                                                 //deadline is Utc::now() + deadline_offset
 
-    //let challenge = H::new(bits, Some(&deadline_offset), None);//without your metadata
-    let challenge = H::new(bits, Some(&deadline_offset), Some(&meta.to_bytes())); //with your metadata
+    //let challenge = H::new(bits, Some(&deadline_offset), None);//without an optional metadata
+    let challenge = H::new(bits, Some(&deadline_offset), Some(&meta.to_bytes())); //with an optional metadata
     println!("generated the challenge {}", challenge);
     let keypair = Rsa::generate(2048).unwrap();
     let keypair = PKey::from_rsa(keypair).unwrap();
@@ -90,7 +91,7 @@ fn main() {
         panic!();
     }
 
-    //you can use the optional metadata field if you want
+    //you can use an optional metadata field if you want
     assert!(received_challenge.meta.is_some());
     let meta_bytes = received_challenge.meta.unwrap();
     let meta = YourMetadata::from_bytes(&meta_bytes);

@@ -3,7 +3,6 @@ use hshs::H;
 use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
-use openssl::sign;
 use openssl::sign::{Signer, Verifier};
 
 //openssl doc: https://docs.rs/openssl/latest/openssl/sign/index.html
@@ -11,12 +10,11 @@ use openssl::sign::{Signer, Verifier};
 fn main() {
     ///////////////////////////////////////////////////////////////////////////
     //X generates an new challenge
-    let version = 1;
     let bits = 10;
     let deadline_offset = Duration::minutes(2); //hshs calls Utc::now() internally when H::new() is called(the DateTime is stored in the struct H)
                                                 //deadline is Utc::now() + deadline_offset
 
-    let challenge = H::new(version, bits, Some(&deadline_offset));
+    let challenge = H::new(bits, Some(&deadline_offset));
     println!("generated the challenge {}", challenge);
     let keypair = Rsa::generate(2048).unwrap();
     let keypair = PKey::from_rsa(keypair).unwrap();

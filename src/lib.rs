@@ -136,10 +136,8 @@ impl H {
     }
 
     fn increment_counter(&mut self) {
-        //todo edge case, all 255
         let mut is_incremented = false;
         for i in (0..self.counter.len()).rev() {
-            // println!("inc counter i: {}", i);
             if self.counter[i] == u8::MAX.into() {
                 continue;
             }
@@ -151,7 +149,6 @@ impl H {
 
         //extend
         if !is_incremented {
-            //  println!("extend counter");
             self.counter.resize(self.counter.len() + 1, 0);
         }
     }

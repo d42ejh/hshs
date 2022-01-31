@@ -1,6 +1,5 @@
 # hshs
-Simple sha3-512 hashcash.(Some features may not available)  
-Still work in progress but most of fundamental features are done.
+Simple sha3-512 hashcash.
 
 # Usage
 Please refer to [practical_example.rs](https://github.com/d42ejh/hshs/blob/master/examples/practical_example.rs)

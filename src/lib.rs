@@ -31,7 +31,7 @@ impl H {
     //generate new challenge
     #[must_use]
     pub fn new(bits: u16, deadline_offset: Option<&chrono::Duration>, meta: Option<&[u8]>) -> Self {
-        let mut rand = vec![0; 64]; //todo change 64 to reasonable size
+        let mut rand = vec![0; 64];
         rand_bytes(&mut rand).unwrap();
         let now = Utc::now();
         let m = match meta {

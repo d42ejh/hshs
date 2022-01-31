@@ -1,12 +1,11 @@
 use bytecheck::CheckBytes;
-use chrono::{DateTime, Duration, Utc};
+use chrono::Duration;
 use hshs::H;
 use openssl::hash::MessageDigest;
 use openssl::pkey::PKey;
 use openssl::rsa::Rsa;
 use openssl::sign::{Signer, Verifier};
 use rkyv::{
-    archived_root,
     ser::{serializers::AllocSerializer, Serializer},
     Archive, Deserialize, Infallible, Serialize,
 };
@@ -45,14 +44,14 @@ fn main() {
         your_program_version: 3,
         memo: memo.to_owned(),
     };
-    //X generates an new challenge
+    //X generates a new challenge
     let bits = 10;
     let deadline_offset = Duration::minutes(2); //hshs calls Utc::now() internally when H::new() is called(the DateTime is stored in the struct H)
                                                 //deadline is Utc::now() + deadline_offset
 
     //let challenge = H::new(bits, Some(&deadline_offset), None);//without an optional metadata
     let challenge = H::new(bits, Some(&deadline_offset), Some(&meta.to_bytes())); //with an optional metadata
-    println!("generated the challenge {}", challenge);
+    println!("generated a new challenge {}", challenge);
     let keypair = Rsa::generate(2048).unwrap();
     let keypair = PKey::from_rsa(keypair).unwrap();
 

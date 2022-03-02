@@ -20,3 +20,6 @@ rkyv: <https://github.com/rkyv/rkyv>
 
 # License
 MIT
+
+###
+I don't think I will be updating this project any further as it has already fulfilled the requirements from my other projects.  

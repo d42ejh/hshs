@@ -2,6 +2,8 @@
 Simple sha3-512 [hashcash](https://en.wikipedia.org/wiki/Hashcash).  
 [paper](https://link.springer.com/content/pdf/10.1007%2F3-540-48071-4_10.pdf)  
 
+### done
+I don't think I will be updating this project any further as it has already fulfilled the requirements from my other projects.  
 
 # Usage
 Please refer to [practical_example.rs](https://github.com/d42ejh/hshs/blob/master/examples/practical_example.rs)
@@ -21,5 +23,4 @@ rkyv: <https://github.com/rkyv/rkyv>
 # License
 MIT
 
-###
-I don't think I will be updating this project any further as it has already fulfilled the requirements from my other projects.  
+

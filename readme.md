@@ -1,5 +1,7 @@
 # hshs
-Simple sha3-512 [hashcash](https://en.wikipedia.org/wiki/Hashcash).
+Simple sha3-512 [hashcash](https://en.wikipedia.org/wiki/Hashcash).  
+[paper](https://link.springer.com/content/pdf/10.1007%2F3-540-48071-4_10.pdf)  
+
 
 # Usage
 Please refer to [practical_example.rs](https://github.com/d42ejh/hshs/blob/master/examples/practical_example.rs)

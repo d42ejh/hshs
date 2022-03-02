@@ -25,7 +25,6 @@ pub struct H {
     pub meta: Option<Vec<u8>>, //optional metadata field
 }
 
-//todo datetime expire check
 
 impl H {
     //generate new challenge

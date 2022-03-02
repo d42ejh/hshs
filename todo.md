@@ -1,1 +1,0 @@
-H::from_string
